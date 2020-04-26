@@ -1,0 +1,164 @@
+{
+  "version": "alpha-LIVE-3.8.2",
+  "unit": {
+    "money": "aUEC",
+    "storage": {
+      "SPU": 1,
+      "SCU": 100
+    }
+  },
+  "harvests": [],
+  "ore": [
+    {
+      "name": "Bexalite",
+      "density": 0.501484575835476,
+      "price": 40.50,
+      "mineableBy": [
+        "vehicle"
+      ]
+    },
+    {
+      "name": "Taranite",
+      "density": 0.5014845758,
+      "price": 32.52,
+      "mineableBy": [
+        "vehicle"
+      ]
+    },
+    {
+      "name": "Borase",
+      "density": 0.5014845758,
+      "price": 32.44,
+      "mineableBy": [
+        "vehicle"
+      ]
+    },
+    {
+      "name": "Laranite",
+      "density": 0.5014845758,
+      "price": 30.25,
+      "mineableBy": [
+        "vehicle"
+      ]
+    },
+    {
+      "name": "Agricium",
+      "density": 0.5204566344,
+      "price": 26.88,
+      "mineableBy": [
+        "vehicle"
+      ]
+    },
+    {
+      "name": "Hephaestanite",
+      "density": 0.4992715498,
+      "price": 14.70,
+      "mineableBy": [
+        "vehicle"
+      ]
+    },
+    {
+      "name": "Titanium",
+      "density": 0.5016,
+      "price": 8.68,
+      "mineableBy": [
+        "vehicle"
+      ]
+    },
+    {
+      "name": "Diamond",
+      "density": 0.5549,
+      "price": 7.16,
+      "mineableBy": [
+        "vehicle"
+      ]
+    },
+    {
+      "name": "Gold",
+      "density": 0.499,
+      "price": 6.25,
+      "mineableBy": [
+        "vehicle"
+      ]
+    },
+    {
+      "name": "Copper",
+      "density": 0.625,
+      "price": 5.77,
+      "mineableBy": [
+        "vehicle"
+      ]
+    },
+    {
+      "name": "Beryl",
+      "density": 0.6725,
+      "price": 4.32,
+      "mineableBy": [
+        "vehicle"
+      ]
+    },
+    {
+      "name": "Corundum",
+      "density": 0.5006797075,
+      "price": 2.65,
+      "mineableBy": [
+        "vehicle"
+      ]
+    },
+    {
+      "name": "Quartz",
+      "density": 0.4813725088,
+      "price": 1.51,
+      "mineableBy": [
+        "vehicle"
+      ]
+    },
+    {
+      "name": "Aluminium",
+      "density": 1.243188995,
+      "price": 1.28,
+      "mineableBy": [
+        "vehicle"
+      ]
+    },
+    {
+      "name": "Inert Material",
+      "density": 0.483,
+      "price": 0.02,
+      "mineableBy": [
+        "vehicle"
+      ]
+    },
+    {
+      "name": "Hadanite",
+      "price": 275,
+      "mineableBy": [
+        "player"
+      ]
+    },
+    {
+      "name": "Aphorite",
+      "price": 150,
+      "mineableBy": [
+        "player"
+      ]
+    },
+    {
+      "name": "Dolivine",
+      "price": 130,
+      "mineableBy": [
+        "player"
+      ]
+    }
+  ],
+  "vehicles": [
+    {
+      "name": "Argo Mole",
+      "cargo": 8000
+    },
+    {
+      "name": "MISC Prospector",
+      "cargo": 3200
+    }
+  ]
+}

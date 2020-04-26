@@ -1,18 +1,27 @@
 {
-  "name": "imyc-back",
+  "name": "scc-myc-back",
   "version": "0.0.1",
   "scripts": {
     "build": "tsc",
-    "start": "node build/server.js"
+    "prestart": "tsc",
+    "start": "LOG_LEVEL=debug node build/server.js | ./node_modules/.bin/pino-pretty"
   },
   "main": "build/server.js",
   "homepage": "/",
   "dependencies": {
     "express": "^4.17.1",
+    "express-pino-logger": "^4.0.0",
+    "pino": "^6.2.1",
     "socket.io": "^2.3.0",
     "uuid": "^7.0.3"
   },
   "devDependencies": {
-    "@types/node": "^13.13.2"
+    "@types/express": "^4.17.6",
+    "@types/express-pino-logger": "^4.0.2",
+    "@types/node": "^13.13.2",
+    "@types/pino": "^6.0.0",
+    "@types/socket.io": "^2.1.4",
+    "@types/uuid": "^7.0.3",
+    "pino-pretty": "^4.0.0"
   }
 }

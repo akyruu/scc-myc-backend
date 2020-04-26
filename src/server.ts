@@ -1,47 +1,45 @@
-import {Player} from './player';
-import {PlayerService} from './player.service';
-import {RushService} from './rush.service';
-import {Rush} from './rush';
+import express from 'express';
+import expressPino from 'express-pino-logger';
+import http from 'http';
+import pino from 'pino';
+import socketIo, {Socket} from 'socket.io';
+
+import {LobbyGroupHandler, LobbyRoomHandler} from './handlers';
 import {ServerConfig} from './server.config';
+import {AppSocket} from './sockets';
 
 // Context
-const app = require('express')();
-const http = require('http');
+const app = express();
 const server = http.createServer(app);
-const io = require('socket.io')(server);
+const io = socketIo(server);
 
-// Services
-const uuid = require('uuid');
+// Logging
+const logger = pino({level: process.env.LOG_LEVEL || 'info'});
+const expressLogger = expressPino({logger});
 
 // Server
-app.get('/', (req: any, res: any) => {
-    res.send('Server started');
-});
+app.use(express.static('public'));
+app.use(expressLogger);
 
-io.on('connection', (socket: any) => {
-    const playerService = new PlayerService(socket, uuid);
-    const rushService = new RushService(socket, uuid, playerService);
+// Socket io
+const lobbyRoomHandler = new LobbyRoomHandler();
+const handlers = [
+    new LobbyGroupHandler(),
+    lobbyRoomHandler,
+];
 
-    // Authentication
+io.on('connection', (socket: Socket) => {
+    logger.info('User connected');
+    const roomSocket = new AppSocket(socket);
+    handlers.forEach(handler => handler.bindEvents(roomSocket));
+
     socket.on('disconnect', () => {
-        rushService.leave();
-        playerService.delete();
-    });
-
-    // Rush
-    socket.on('create-rush', (ownerName: string) => {
-        const owner = playerService.create(ownerName);
-        const rush = rushService.create(owner.uuid);
-        rushService.join(rush);
-    }).on('join-rush', (playerName: string, rushUuid: string) => {
-        playerService.create(playerName);
-        const rush = rushService.find(rushUuid);
-        rushService.join(rush);
-    }).on('leave-rush', () => {
-        rushService.leave(socket);
+        logger.info('User disconnected');
+        lobbyRoomHandler.leaveRoom(roomSocket);
     });
 });
 
-server.listen(ServerConfig.port, ServerConfig.ip, () => {
-    console.log('Server started on ip=<' + ServerConfig.ip + '> with port=<' + ServerConfig.port + '>');
+// FIXME hostname throw a compilation error !!!
+(<any>server).listen(ServerConfig.port, ServerConfig.hostname, () => {
+    logger.info('Server running on %s:%d', ServerConfig.hostname, ServerConfig.port);
 });
