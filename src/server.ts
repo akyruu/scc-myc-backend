@@ -4,7 +4,7 @@ import http from 'http';
 import pino from 'pino';
 import socketIo, {Socket} from 'socket.io';
 
-import {LobbyGroupHandler, LobbyRoomHandler} from './handlers';
+import {LobbyGroupHandler, LobbyRushHandler} from './handlers';
 import {ServerConfig} from './server.config';
 import {AppSocket} from './sockets';
 
@@ -22,24 +22,24 @@ app.use(express.static('public'));
 app.use(expressLogger);
 
 // Socket io
-const lobbyRoomHandler = new LobbyRoomHandler();
+const lobbyRushHandler = new LobbyRushHandler();
 const handlers = [
-    new LobbyGroupHandler(),
-    lobbyRoomHandler,
+  new LobbyGroupHandler(),
+  lobbyRushHandler,
 ];
 
 io.on('connection', (socket: Socket) => {
-    logger.info('User connected');
-    const roomSocket = new AppSocket(socket);
-    handlers.forEach(handler => handler.bindEvents(roomSocket));
+  logger.info('User connected');
+  const rushSocket = new AppSocket(socket);
+  handlers.forEach(handler => handler.bindEvents(rushSocket));
 
-    socket.on('disconnect', () => {
-        logger.info('User disconnected');
-        lobbyRoomHandler.leaveRoom(roomSocket);
-    });
+  socket.on('disconnect', () => {
+    logger.info('User disconnected');
+    lobbyRushHandler.leaveRush(rushSocket);
+  });
 });
 
 // FIXME hostname throw a compilation error !!!
 (<any>server).listen(ServerConfig.port, ServerConfig.hostname, () => {
-    logger.info('Server running on %s:%d', ServerConfig.hostname, ServerConfig.port);
+  logger.info('Server running on %s:%d', ServerConfig.hostname, ServerConfig.port);
 });

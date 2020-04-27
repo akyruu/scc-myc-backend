@@ -1,2 +1,2 @@
 export * from './lobby-group.handler';
-export * from './lobby-room.handler';
+export * from './lobby-rush.handler';

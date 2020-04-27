@@ -1,12 +1,12 @@
 import {Socket} from 'socket.io';
 
-import {Room} from '../models';
+import {Player, Rush} from '../models';
 
 export class AppSocket {
-    /* FIELDS ============================================================== */
-    public player: string;
-    public room: Room;
+  /* FIELDS ============================================================== */
+  public player: Player;
+  public rush: Rush;
 
-    /* METHODS ============================================================= */
-    constructor(public io: Socket) {}
+  /* METHODS ============================================================= */
+  constructor(public io: Socket) {}
 }
