@@ -5,7 +5,7 @@ import {AppSocket} from '../sockets';
 import {ErrorEmitter} from './error.emitter';
 
 /**
- * Emitters for rushs operations in lobby.
+ * Emitters for rush operations in lobby.
  *
  * @version 0.1.0
  */

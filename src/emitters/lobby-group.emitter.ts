@@ -1,9 +1,9 @@
-import {Group} from '../models';
+import {Group, GroupProps} from '../models';
 import {AppSocket} from '../sockets';
 import {ErrorEmitter} from './error.emitter';
 
 /**
- * Emitters for groups operations in lobby.
+ * Emitters for group operations in lobby.
  *
  * @version 0.1.0
  */
@@ -14,7 +14,7 @@ export class LobbyGroupEmitter {
     socket.io.in(socket.rush.uuid).broadcast.emit('lobby:group:created', group);
   }
 
-  static groupPropsUpdated(socket: AppSocket, groupName: string, updatedProps: { name?: string, vehicleName?: string }): void {
+  static groupPropsUpdated(socket: AppSocket, groupName: string, updatedProps: GroupProps): void {
     const data = {groupName: groupName, updatedProps: updatedProps};
     socket.io.emit('lobby:group:propsUpdated', data);
     socket.io.in(socket.rush.uuid).broadcast.emit('lobby:group:propsUpdated', data);

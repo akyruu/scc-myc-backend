@@ -16,6 +16,19 @@ export class RushUtils {
     return rush.players.find(player => player.name === playerName);
   }
 
+  static findPlayerDeep(rush: Rush, playerName: string): Player {
+    let player = this.findPlayer(rush, playerName);
+    if (!player) {
+      for (const group of rush.groups) {
+        player = GroupUtils.findPlayer(group, playerName);
+        if (player) {
+          break;
+        }
+      }
+    }
+    return player;
+  }
+
   static deletePlayer(rush: Rush, playerName: string): Player | false {
     const index = rush.players.findIndex(player => player.name === playerName);
     return (index >= 0) ? rush.players.splice(index, 1)[0] : false;

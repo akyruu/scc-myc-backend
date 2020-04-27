@@ -4,7 +4,7 @@ import http from 'http';
 import pino from 'pino';
 import socketIo, {Socket} from 'socket.io';
 
-import {LobbyGroupHandler, LobbyRushHandler} from './handlers';
+import {LobbyGroupHandler, LobbyPlayerHandler, LobbyRushHandler} from './handlers';
 import {ServerConfig} from './server.config';
 import {AppSocket} from './sockets';
 
@@ -22,9 +22,11 @@ app.use(express.static('public'));
 app.use(expressLogger);
 
 // Socket io
+// TODO ameliorate event bindings (conditional, add unbind, binding by status, etc.)
 const lobbyRushHandler = new LobbyRushHandler();
 const handlers = [
   new LobbyGroupHandler(),
+  new LobbyPlayerHandler(),
   lobbyRushHandler,
 ];
 
