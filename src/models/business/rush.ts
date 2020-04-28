@@ -10,6 +10,6 @@ export class Rush {
   groups: Group[] = [];
   settings: Settings;
 
-  solo = false;
+  single = false;
   launched = false;
 }

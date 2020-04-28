@@ -16,7 +16,8 @@ export class LobbyRushHandler implements SocketHandler {
 
   /* METHODS ============================================================== */
   bindEvents(socket: AppSocket): void {
-    socket.io.on('lobby:rush:create', playerName => this._createRush(socket, playerName))
+    socket.io.on('lobby:rush:create', (data: { playerName: string, single: boolean }) =>
+        this._createRush(socket, data.playerName, data.single))
         .on('lobby:rush:join', (data: { playerName: string, rushUuid: string }) =>
             this._joinRush(socket, data.playerName, data.rushUuid))
         .on('lobby:rush:launch', () => this._launchRush(socket))
@@ -30,9 +31,10 @@ export class LobbyRushHandler implements SocketHandler {
    *
    * @param socket Current socket.
    * @param playerName Player's name (leader).
+   * @param single One player only mode.
    * @private
    */
-  private _createRush(socket: AppSocket, playerName: string): void {
+  private _createRush(socket: AppSocket, playerName: string, single: boolean): void {
     const rushUuid = UuidUtils.generateUuid(Array.from(this._rushs.keys()));
 
     const player = new Player();
@@ -43,6 +45,7 @@ export class LobbyRushHandler implements SocketHandler {
     rush.leader = player;
     rush.players.push(player);
     rush.settings = require('../../data/settings.json');
+    rush.single = single;
     this._rushs.set(rushUuid, rush);
 
     socket.io.join(rushUuid);
