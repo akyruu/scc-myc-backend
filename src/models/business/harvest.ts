@@ -1,5 +1,5 @@
-// TODO shared between frontend and backend
-export interface Harvest {
+// Shared
+export class Harvest {
   name: string;
   price: number;
 }

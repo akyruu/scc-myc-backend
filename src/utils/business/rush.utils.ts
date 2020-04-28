@@ -1,4 +1,5 @@
-import {Group, Player, Rush} from '../models';
+// Shared
+import {Group, Player, Rush} from '../../models';
 import {GroupUtils} from './group.utils';
 
 export class RushUtils {
@@ -10,6 +11,11 @@ export class RushUtils {
   static deleteGroup(rush: Rush, groupName: string): Group | false {
     const index = rush.groups.findIndex(group => group.name === groupName);
     return (index >= 0) ? rush.groups.splice(index, 1)[0] : false;
+  }
+
+  /* Player ---------------------------------------------------------------- */
+  static isLeader(rush: Rush, playerName: string): boolean {
+    return rush.leader?.name === playerName;
   }
 
   static findPlayer(rush: Rush, playerName: string): Player {

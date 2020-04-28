@@ -1,4 +1,4 @@
-// TODO shared between frontend and backend
+// Shared
 import {Group} from './group';
 import {Player} from './player';
 import {Settings} from './settings';

@@ -1,7 +1,12 @@
-import {Group, Player} from '../models';
+// Shared
+import {Group, Player} from '../../models';
 
 export class GroupUtils {
   /* STATIC METHODS ====================================================== */
+  static isLeader(group: Group, playerName: string): boolean {
+    return group.leader?.name === playerName;
+  }
+
   static findPlayer(group: Group, playerName: string): Player {
     return group.players.find(player => player.name === playerName);
   }
