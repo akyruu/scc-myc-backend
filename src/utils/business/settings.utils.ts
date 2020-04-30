@@ -7,15 +7,20 @@ export class SettingsUtils {
     return settings.harvests.find(harvest => harvest.name === harvestName);
   }
 
-  static findAllOres(settings: Settings, mineableBy: 'player' | 'vehicle'): Ore[] {
-    return settings.ores.filter(ore => ore.mineableBy.includes(mineableBy));
+  static findAllOres(settings: Settings, mineableBy: 'player' | 'vehicle', includeInert = true): Ore[] {
+    const ores = settings.ores.filter(ore => ore.mineableBy.includes(mineableBy));
+    if (!includeInert) {
+      const inertOre = this.findInertOre(settings);
+      ores.splice(ores.indexOf(inertOre), 1);
+    }
+    return ores;
   }
 
   static findOre(settings: Settings, oreName: string): Ore {
     return settings.ores.find(ore => ore.name === oreName);
   }
 
-  static findInertMaterialOre(settings: Settings) {
+  static findInertOre(settings: Settings) {
     return this.findOre(settings, 'Inert Material');
   }
 

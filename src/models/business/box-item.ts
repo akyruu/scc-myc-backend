@@ -5,5 +5,9 @@ import {Ore} from './ore';
 export class BoxItem {
   item: Harvest | Ore;
   type: 'harvest' | 'ore';
-  quantity = 0;
+  quantity: number;
+
+  readonly calculated = {
+    value: 0
+  };
 }

@@ -1,11 +1,11 @@
-import express from 'express';
+import express, {Request, Response} from 'express';
 import expressPino from 'express-pino-logger';
+import {readFileSync} from 'fs';
 import http from 'http';
 import pino from 'pino';
 import socketIo, {Socket} from 'socket.io';
 
 import {LobbyGroupHandler, LobbyPlayerHandler, LobbyRushHandler} from './handlers';
-import {ServerConfig} from './server.config';
 import {AppSocket} from './sockets';
 
 // Context
@@ -20,6 +20,8 @@ const expressLogger = expressPino({logger});
 // Server
 app.use(express.static('public'));
 app.use(expressLogger);
+
+app.get('/api/settings', (req: Request, res: Response) => res.send(readFileSync('data/settings.json')));
 
 // Socket io
 // TODO ameliorate event bindings (conditional, add unbind, binding by status, etc.)
@@ -42,6 +44,8 @@ io.on('connection', (socket: Socket) => {
 });
 
 // FIXME hostname throw a compilation error !!!
-(<any>server).listen(ServerConfig.port, ServerConfig.hostname, () => {
+/*(<any>server).listen(ServerConfig.port, ServerConfig.hostname, () => {
   logger.info('Server running on %s:%d', ServerConfig.hostname, ServerConfig.port);
-});
+});*/
+// FIXME use previous method for deployment
+server.listen(8080);

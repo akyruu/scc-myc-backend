@@ -1,9 +1,10 @@
 // Shared
 import {Box} from './box';
 import {Cargo} from './cargo';
+import {CargoOwner} from './cargo-owner';
 import {Vehicle} from './vehicle';
 
-export class Player {
+export class Player implements CargoOwner {
   name: string;
 
   vehicle: Vehicle;

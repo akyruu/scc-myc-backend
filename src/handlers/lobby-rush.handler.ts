@@ -1,5 +1,5 @@
 import {LobbyRushEmitter} from '../emitters';
-import {Player, Rush} from '../models';
+import {Rush} from '../models';
 import {AppSocket} from '../sockets';
 import {RushUtils, UuidUtils} from '../utils';
 import {SocketHandler} from './socket.handler';
@@ -37,15 +37,10 @@ export class LobbyRushHandler implements SocketHandler {
   private _createRush(socket: AppSocket, playerName: string, single: boolean): void {
     const rushUuid = UuidUtils.generateUuid(Array.from(this._rushs.keys()));
 
-    const player = new Player();
-    player.name = playerName;
+    const player = RushUtils.createPlayer(playerName);
 
-    const rush = new Rush();
+    const rush = RushUtils.createRush(player, require('../../data/settings.json'), single);
     rush.uuid = rushUuid;
-    rush.leader = player;
-    rush.players.push(player);
-    rush.settings = require('../../data/settings.json');
-    rush.single = single;
     this._rushs.set(rushUuid, rush);
 
     socket.io.join(rushUuid);
@@ -71,8 +66,7 @@ export class LobbyRushHandler implements SocketHandler {
       LobbyRushEmitter.playerAlreadyExistsInRush(socket.io, playerName, rushUuid);
     }
 
-    const player = new Player();
-    player.name = playerName;
+    const player = RushUtils.createPlayer(playerName);
 
     socket.io.join(rushUuid);
     socket.player = player;

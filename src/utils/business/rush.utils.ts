@@ -1,9 +1,25 @@
 // Shared
-import {Group, Player, Rush} from '../../models';
+import {Group, Player, Rush, Settings} from '../../models';
 import {GroupUtils} from './group.utils';
 
 export class RushUtils {
-  /* STATIC METHODS ====================================================== */
+  /* STATIC METHODS ======================================================== */
+  static createPlayer(playerName: string): Player {
+    const player = new Player();
+    player.name = playerName;
+    return player;
+  }
+
+  static createRush(leader: Player, settings: Settings, single = false): Rush {
+    const rush = new Rush();
+    rush.leader = leader;
+    rush.players.push(leader);
+    rush.settings = settings;
+    rush.single = single;
+    return rush;
+  }
+
+  /* Group ----------------------------------------------------------------- */
   static findGroup(rush: Rush, groupName: string): Group {
     return rush.groups.find(group => group.name === groupName);
   }

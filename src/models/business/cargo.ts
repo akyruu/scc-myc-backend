@@ -8,4 +8,11 @@ export class Cargo {
 
   fragment: Fragment;
   fragments: Fragment[] = [];
+
+  readonly calculated = {
+    mass: 0,
+    quantity: 0,
+    percent: 0,
+    value: 0
+  };
 }
