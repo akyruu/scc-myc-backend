@@ -1,3 +1,4 @@
+import {Socket} from 'socket.io';
 import {Group, GroupProps} from '../models';
 import {AppSocket} from '../sockets';
 import {ErrorEmitter} from './error.emitter';
@@ -14,43 +15,47 @@ export class LobbyGroupEmitter {
     socket.io.in(socket.rush.uuid).broadcast.emit('lobby:group:created', group);
   }
 
-  static groupPropsUpdated(socket: AppSocket, groupName: string, updatedProps: GroupProps): void {
-    const data = {groupName: groupName, updatedProps: updatedProps};
+  static groupPropsUpdated(socket: AppSocket, groupIndex: number, updatedProps: GroupProps): void {
+    const data = {groupIndex: groupIndex, updatedProps: updatedProps};
     socket.io.emit('lobby:group:propsUpdated', data);
     socket.io.in(socket.rush.uuid).broadcast.emit('lobby:group:propsUpdated', data);
   }
 
-  static groupRemoved(socket: AppSocket, groupName: string): void {
-    socket.io.emit('lobby:group:removed', groupName);
-    socket.io.in(socket.rush.uuid).broadcast.emit('lobby:group:removed', groupName);
+  static groupRemoved(socket: AppSocket, groupIndex: number): void {
+    socket.io.emit('lobby:group:removed', groupIndex);
+    socket.io.in(socket.rush.uuid).broadcast.emit('lobby:group:removed', groupIndex);
   }
 
   /* Player -------------------------------------------------------------- */
-  static playerAdded(socket: AppSocket, playerName: string, groupName: string): void {
-    const data = {playerName: playerName, groupName: groupName};
+  static playerAdded(socket: AppSocket, playerName: string, groupIndex: number): void {
+    const data = {playerName: playerName, groupIndex: groupIndex};
     socket.io.emit('lobby:group:playerAdded', data);
     socket.io.in(socket.rush.uuid).broadcast.emit('lobby:group:playerAdded', data);
   }
 
-  static playerSwitched(socket: AppSocket, playerName: string, oldGroupName: string, newGroupName: string): void {
-    const data = {playerName: playerName, oldGroupName: oldGroupName, newGroupName: newGroupName};
+  static playerSwitched(socket: AppSocket, playerName: string, oldGroupIndex: number, newGroupIndex: number): void {
+    const data = {playerName: playerName, oldGroupIndex: oldGroupIndex, newGroupIndex: newGroupIndex};
     socket.io.emit('lobby:group:playerSwitched', data);
     socket.io.in(socket.rush.uuid).broadcast.emit('lobby:group:playerSwitched', data);
   }
 
-  static playerRemoved(socket: AppSocket, playerName: string, groupName: string): void {
-    const data = {playerName: playerName, groupName: groupName};
+  static playerRemoved(socket: AppSocket, playerName: string, groupIndex: number): void {
+    const data = {playerName: playerName, groupIndex: groupIndex};
     socket.io.emit('lobby:group:playerRemoved', data);
     socket.io.in(socket.rush.uuid).broadcast.emit('lobby:group:playerRemoved', data);
   }
 
   /* Errors -------------------------------------------------------------- */
-  static groupNotFound(socket: AppSocket, groupName: string) {
-    ErrorEmitter.exception(socket.io, 'lobby:group:notFound', {groupName: groupName});
+  static groupAlreadyExists(socket: Socket, groupName: string): void {
+    ErrorEmitter.exception(socket, 'lobby:group:alreadyExists', {groupName: groupName});
   }
 
-  static playerNotFound(socket: AppSocket, playerName: string, groupName: string) {
-    ErrorEmitter.exception(socket.io, 'lobby:group:playerNotFound', {playerName: playerName, groupName: groupName});
+  static groupNotFound(socket: AppSocket, groupIndex: number) {
+    ErrorEmitter.exception(socket.io, 'lobby:group:notFound', {groupIndex: groupIndex});
+  }
+
+  static playerNotFound(socket: AppSocket, playerName: string, groupIndex: number) {
+    ErrorEmitter.exception(socket.io, 'lobby:group:playerNotFound', {playerName: playerName, groupIndex: groupIndex});
   }
 
   /* CONSTRUCTOR ========================================================= */

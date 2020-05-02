@@ -20,12 +20,16 @@ export class RushUtils {
   }
 
   /* Group ----------------------------------------------------------------- */
-  static findGroup(rush: Rush, groupName: string): Group {
-    return rush.groups.find(group => group.name === groupName);
+  static findGroup(rush: Rush, groupIndex: number): Group {
+    return rush.groups.find(group => group.index === groupIndex);
   }
 
-  static deleteGroup(rush: Rush, groupName: string): Group | false {
-    const index = rush.groups.findIndex(group => group.name === groupName);
+  static findGroupIndex(rush: Rush, groupIndex: number): number {
+    return rush.groups.findIndex(group => group.index === groupIndex);
+  }
+
+  static deleteGroup(rush: Rush, groupIndex: number): Group | false {
+    const index = this.findGroupIndex(rush, groupIndex);
     return (index >= 0) ? rush.groups.splice(index, 1)[0] : false;
   }
 
@@ -36,6 +40,10 @@ export class RushUtils {
 
   static findPlayer(rush: Rush, playerName: string): Player {
     return rush.players.find(player => player.name === playerName);
+  }
+
+  static findPlayerIndex(rush: Rush, playerName: string): number {
+    return rush.players.findIndex(player => player.name === playerName);
   }
 
   static findPlayerDeep(rush: Rush, playerName: string): Player {
@@ -52,11 +60,10 @@ export class RushUtils {
   }
 
   static deletePlayer(rush: Rush, playerName: string): Player | false {
-    const index = rush.players.findIndex(player => player.name === playerName);
+    const index = this.findPlayerIndex(rush, playerName);
     return (index >= 0) ? rush.players.splice(index, 1)[0] : false;
   }
 
-  /* All ------------------------------------------------------------------- */
   static deletePlayerDeep(rush: Rush, playerName: string): void {
     let player = this.deletePlayer(rush, playerName);
     if (!player) {

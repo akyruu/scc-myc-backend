@@ -11,8 +11,12 @@ export class GroupUtils {
     return group.players.find(player => player.name === playerName);
   }
 
+  static findPlayerIndex(group: Group, playerName: string): number {
+    return group.players.findIndex(player => player.name === playerName);
+  }
+
   static deletePlayer(group: Group, playerName: string): Player | false {
-    const index = group.players.findIndex(player => player.name === playerName);
+    const index = this.findPlayerIndex(group, playerName);
     return (index >= 0) ? group.players.splice(index, 1)[0] : false;
   }
 

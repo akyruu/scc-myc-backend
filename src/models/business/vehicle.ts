@@ -1,5 +1,5 @@
 // Shared
-export interface Vehicle {
+export class Vehicle {
   name: string;
   cargo: number;
 }

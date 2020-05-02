@@ -5,6 +5,7 @@ import {Player} from './player';
 import {Vehicle} from './vehicle';
 
 export class Group implements CargoOwner {
+  index: number;
   name: string;
   leader: Player;
   players: Player[] = [];

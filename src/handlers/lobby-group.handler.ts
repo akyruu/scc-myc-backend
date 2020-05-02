@@ -13,17 +13,17 @@ export class LobbyGroupHandler implements SocketHandler {
   /* METHODS ============================================================== */
   bindEvents(socket: AppSocket): void {
     socket.io.on('lobby:group:create', groupName => this._createGroup(socket, groupName))
-        .on('lobby:group:updateProps', (data: { groupName: string, updatedProps: GroupProps }) =>
-            this._updateGroupProps(socket, data.groupName, data.updatedProps))
-        .on('lobby:group:remove', groupName => this._removeGroup(socket, groupName));
+        .on('lobby:group:updateProps', (data: { groupIndex: number, updatedProps: GroupProps }) =>
+            this._updateGroupProps(socket, data.groupIndex, data.updatedProps))
+        .on('lobby:group:remove', groupIndex => this._removeGroup(socket, groupIndex));
 
     // Player
-    socket.io.on('lobby:group:addPlayer', (data: { playerName: string, groupName: string }) =>
-        this._addPlayer(socket, data.playerName, data.groupName))
-        .on('lobby:group:removePlayer', (data: { playerName: string, groupName: string }) =>
-            this._removePlayer(socket, data.playerName, data.groupName))
-        .on('lobby:group:switchPlayer', (data: { playerName: string, oldGroupName: string, newGroupName: string }) =>
-            this._switchPlayer(socket, data.playerName, data.oldGroupName, data.newGroupName));
+    socket.io.on('lobby:group:addPlayer', (data: { playerName: string, groupIndex: number }) =>
+        this._addPlayer(socket, data.playerName, data.groupIndex))
+        .on('lobby:group:removePlayer', (data: { playerName: string, groupIndex: number }) =>
+            this._removePlayer(socket, data.playerName, data.groupIndex))
+        .on('lobby:group:switchPlayer', (data: { playerName: string, oldGroupIndex: number, newGroupIndex: number }) =>
+            this._switchPlayer(socket, data.playerName, data.oldGroupIndex, data.newGroupIndex));
 
   }
 
@@ -37,16 +37,16 @@ export class LobbyGroupHandler implements SocketHandler {
   private _createGroup(socket: AppSocket, groupName: string): void {
     const group = new Group();
 
-    const groupNames = socket.rush.groups.map(g => g.name);
-    if (groupNames.includes(groupName)) {
-      const groups = groupName.match(/([^0-9]+)[0-9]+$/g);
-      const baseName = (groups ? groups[1] : groupName);
+    let lastIndex = 0;
+    socket.rush.groups.forEach(group => lastIndex = Math.max(lastIndex, group.index));
+    group.index = lastIndex + 1;
 
-      let copy = (socket.rush.groups.length + 1);
-      do {
-        group.name = baseName + (copy++);
-      } while (groupNames.includes(group.name));
-    } else {
+    if (groupName) {
+      const groupNames = socket.rush.groups.map(g => g.name);
+      if (groupNames.includes(groupName)) {
+        LobbyGroupEmitter.groupAlreadyExists(socket.io, groupName);
+        return;
+      }
       group.name = groupName;
     }
 
@@ -58,18 +58,23 @@ export class LobbyGroupHandler implements SocketHandler {
    * Update the properties of group.
    *
    * @param socket Current socket.
-   * @param groupName Name of group to update.
+   * @param groupIndex Index of group to update.
    * @param updatedProps Updated properties of group.
    * @private
    */
-  private _updateGroupProps(socket: AppSocket, groupName: string, updatedProps: GroupProps) {
-    const group = RushUtils.findGroup(socket.rush, groupName);
+  private _updateGroupProps(socket: AppSocket, groupIndex: number, updatedProps: GroupProps) {
+    const group = RushUtils.findGroup(socket.rush, groupIndex);
     if (!group) {
-      LobbyGroupEmitter.groupNotFound(socket, groupName);
+      LobbyGroupEmitter.groupNotFound(socket, groupIndex);
       return;
     }
 
     if (updatedProps.name !== undefined) {
+      const groupNames = socket.rush.groups.map(g => g.name);
+      if (groupNames.includes(updatedProps.name)) {
+        LobbyGroupEmitter.groupAlreadyExists(socket.io, updatedProps.name);
+        return;
+      }
       group.name = updatedProps.name;
     }
 
@@ -90,30 +95,30 @@ export class LobbyGroupHandler implements SocketHandler {
       if (updatedProps.leaderName) {
         leader = GroupUtils.findPlayer(group, updatedProps.leaderName);
         if (!leader) {
-          LobbyGroupEmitter.playerNotFound(socket, updatedProps.leaderName, groupName);
+          LobbyGroupEmitter.playerNotFound(socket, updatedProps.leaderName, groupIndex);
           return;
         }
       }
       group.leader = leader;
     }
 
-    LobbyGroupEmitter.groupPropsUpdated(socket, groupName, updatedProps);
+    LobbyGroupEmitter.groupPropsUpdated(socket, groupIndex, updatedProps);
   }
 
   /**
    * Remove existing group.
    *
    * @param socket Current socket.
-   * @param groupName Name of group to remove.
+   * @param groupIndex Index of group to remove.
    * @private
    */
-  private _removeGroup(socket: AppSocket, groupName: string): void {
-    const group = RushUtils.deleteGroup(socket.rush, groupName);
+  private _removeGroup(socket: AppSocket, groupIndex: number): void {
+    const group = RushUtils.deleteGroup(socket.rush, groupIndex);
     if (!group) {
-      LobbyGroupEmitter.groupNotFound(socket, groupName);
+      LobbyGroupEmitter.groupNotFound(socket, groupIndex);
     } else {
       socket.rush.players.push(...group.players);
-      LobbyGroupEmitter.groupRemoved(socket, groupName);
+      LobbyGroupEmitter.groupRemoved(socket, groupIndex);
     }
   }
 
@@ -123,25 +128,25 @@ export class LobbyGroupHandler implements SocketHandler {
    *
    * @param socket Current socket.
    * @param playerName Player to add.
-   * @param groupName Name of target group.
+   * @param groupIndex Index of target group.
    * @private
    */
-  private _addPlayer(socket: AppSocket, playerName: string, groupName: string) {
+  private _addPlayer(socket: AppSocket, playerName: string, groupIndex: number) {
     const player = RushUtils.findPlayer(socket.rush, playerName);
     if (!player) {
-      LobbyRushEmitter.playerNotFound(socket.io, playerName, groupName);
+      LobbyGroupEmitter.playerNotFound(socket, playerName, groupIndex);
       return;
     }
 
-    const group = RushUtils.findGroup(socket.rush, groupName);
+    const group = RushUtils.findGroup(socket.rush, groupIndex);
     if (!group) {
-      LobbyGroupEmitter.groupNotFound(socket, groupName);
+      LobbyGroupEmitter.groupNotFound(socket, groupIndex);
       return;
     }
 
     RushUtils.deletePlayer(socket.rush, playerName);
     group.players.push(player);
-    LobbyGroupEmitter.playerAdded(socket, playerName, groupName);
+    LobbyGroupEmitter.playerAdded(socket, playerName, groupIndex);
   }
 
   /**
@@ -149,24 +154,24 @@ export class LobbyGroupHandler implements SocketHandler {
    *
    * @param socket Current socket.
    * @param playerName Player to remove.
-   * @param groupName Name of target group.
+   * @param groupIndex Index of target group.
    * @private
    */
-  private _removePlayer(socket: AppSocket, playerName: string, groupName: string) {
-    const group = RushUtils.findGroup(socket.rush, groupName);
+  private _removePlayer(socket: AppSocket, playerName: string, groupIndex: number) {
+    const group = RushUtils.findGroup(socket.rush, groupIndex);
     if (!group) {
-      LobbyGroupEmitter.groupNotFound(socket, groupName);
+      LobbyGroupEmitter.groupNotFound(socket, groupIndex);
       return;
     }
 
     const playerIndex = group.players.findIndex(player => player.name === playerName);
     if (playerIndex < 0) {
-      LobbyGroupEmitter.playerNotFound(socket, playerName, groupName);
+      LobbyGroupEmitter.playerNotFound(socket, playerName, groupIndex);
       return;
     }
 
     socket.rush.players.push(group.players.splice(playerIndex, 1)[0]);
-    LobbyGroupEmitter.playerRemoved(socket, playerName, groupName);
+    LobbyGroupEmitter.playerRemoved(socket, playerName, groupIndex);
   }
 
   /**
@@ -174,30 +179,30 @@ export class LobbyGroupHandler implements SocketHandler {
    *
    * @param socket Current socket.
    * @param playerName Player to switch.
-   * @param oldGroupName Name of source group.
-   * @param newGroupName Name of target group.
+   * @param oldGroupIndex Index of source group.
+   * @param newGroupIndex Index of target group.
    * @private
    */
-  private _switchPlayer(socket: AppSocket, playerName: string, oldGroupName: string, newGroupName: string) {
-    const oldGroup = RushUtils.findGroup(socket.rush, oldGroupName);
+  private _switchPlayer(socket: AppSocket, playerName: string, oldGroupIndex: number, newGroupIndex: number) {
+    const oldGroup = RushUtils.findGroup(socket.rush, oldGroupIndex);
     if (!oldGroup) {
-      LobbyGroupEmitter.groupNotFound(socket, oldGroupName);
+      LobbyGroupEmitter.groupNotFound(socket, oldGroupIndex);
       return;
     }
 
-    const newGroup = RushUtils.findGroup(socket.rush, newGroupName);
+    const newGroup = RushUtils.findGroup(socket.rush, newGroupIndex);
     if (!newGroup) {
-      LobbyGroupEmitter.groupNotFound(socket, newGroupName);
+      LobbyGroupEmitter.groupNotFound(socket, newGroupIndex);
       return;
     }
 
     const playerIndex = oldGroup.players.findIndex(player => player.name === playerName);
     if (playerIndex < 0) {
-      LobbyGroupEmitter.playerNotFound(socket, playerName, oldGroupName);
+      LobbyGroupEmitter.playerNotFound(socket, playerName, oldGroupIndex);
       return;
     }
 
     newGroup.players.push(oldGroup.players.splice(playerIndex, 1)[0]);
-    LobbyGroupEmitter.playerSwitched(socket, playerName, oldGroupName, newGroupName);
+    LobbyGroupEmitter.playerSwitched(socket, playerName, oldGroupIndex, newGroupIndex);
   }
 }
