@@ -4,8 +4,7 @@
   "scripts": {
     "build": "tsc",
     "prestart": "tsc",
-    "start": "LOG_LEVEL=debug node build/server.js | ./node_modules/.bin/pino-pretty",
-    "start-without-security": "ng serve --host 0.0.0.0 --disable-host-check"
+    "start": "LOG_LEVEL=debug node build/server.js | ./node_modules/.bin/pino-pretty"
   },
   "main": "build/server.js",
   "homepage": "/",

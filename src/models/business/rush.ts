@@ -9,7 +9,7 @@ export class Rush {
   players: Player[] = [];
   groups: Group[] = [];
   settings: Settings;
+  single: boolean;
 
-  single = false;
   launched = false;
 }

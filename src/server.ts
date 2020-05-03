@@ -5,7 +5,8 @@ import http from 'http';
 import pino from 'pino';
 import socketIo, {Socket} from 'socket.io';
 
-import {LobbyGroupHandler, LobbyPlayerHandler, LobbyRushHandler} from './handlers';
+import {GroupHandler, PlayerHandler, RushHandler} from './handlers';
+import {ServerData} from './server.data';
 import {AppSocket} from './sockets';
 
 // Context
@@ -25,11 +26,12 @@ app.get('/api/settings', (req: Request, res: Response) => res.send(readFileSync(
 
 // Socket io
 // TODO ameliorate event bindings (conditional, add unbind, binding by status, etc.)
-const lobbyRushHandler = new LobbyRushHandler();
+const data = new ServerData();
+const rushHandler = new RushHandler(data, logger);
 const handlers = [
-  new LobbyGroupHandler(),
-  new LobbyPlayerHandler(),
-  lobbyRushHandler,
+  new GroupHandler(),
+  new PlayerHandler(),
+  rushHandler,
 ];
 
 io.on('connection', (socket: Socket) => {
@@ -39,7 +41,7 @@ io.on('connection', (socket: Socket) => {
 
   socket.on('disconnect', () => {
     logger.info('User disconnected');
-    lobbyRushHandler.leaveRush(rushSocket);
+    rushHandler.leaveRush(rushSocket);
   });
 });
 
