@@ -59,6 +59,12 @@ export class RushUtils {
     return player;
   }
 
+  static findAllPlayers(rush: Rush): Player[] {
+    const players = [...rush.players];
+    rush.groups.forEach(group => players.push(...group.players));
+    return players;
+  }
+
   static deletePlayer(rush: Rush, playerName: string): Player | false {
     const index = this.findPlayerIndex(rush, playerName);
     return (index >= 0) ? rush.players.splice(index, 1)[0] : false;

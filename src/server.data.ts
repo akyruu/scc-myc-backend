@@ -1,4 +1,4 @@
-import {Rush, SocketError} from './models';
+import {Rush, rushNotFoundError} from './models';
 import {UuidUtils} from './utils';
 
 export class ServerData {
@@ -14,7 +14,7 @@ export class ServerData {
   findRush(rushUuid: string): Rush {
     const rush = ServerData._rushByUuid.get(rushUuid);
     if (rush === null) {
-      throw new SocketError('rushNotFound', {rushUuid: rushUuid});
+      throw rushNotFoundError(rushUuid);
     }
     return rush;
   }

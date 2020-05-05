@@ -1,5 +1,5 @@
 // Shared
-import {Harvest, Ore, Settings, Vehicle} from '../../models';
+import {Harvest, Item, ItemType, Ore, Settings, Vehicle} from '../../models';
 
 export class SettingsUtils {
   /* STATIC METHODS ====================================================== */
@@ -7,6 +7,19 @@ export class SettingsUtils {
     return settings.harvests.find(harvest => harvest.name === harvestName);
   }
 
+  /* Item ------------------------------------------------------------------ */
+  static findItem(settings: Settings, itemName: string, itemType: ItemType): Item {
+    switch (itemType) {
+      case 'harvest':
+        return this.findHarvest(settings, itemName);
+      case 'ore':
+        return this.findOre(settings, itemName);
+      default:
+        return null;
+    }
+  }
+
+  /* Ore ------------------------------------------------------------------- */
   static findAllOres(settings: Settings, mineableBy: 'player' | 'vehicle', includeInert = true): Ore[] {
     const ores = settings.ores.filter(ore => ore.mineableBy.includes(mineableBy));
     if (!includeInert) {
@@ -24,6 +37,7 @@ export class SettingsUtils {
     return this.findOre(settings, 'Inert Material');
   }
 
+  /* Vehicle --------------------------------------------------------------- */
   static findVehicle(settings: Settings, vehicleName: string): Vehicle {
     return settings.vehicles.find(vehicle => vehicle.name === vehicleName);
   }

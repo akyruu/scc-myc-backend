@@ -1,4 +1,14 @@
-import {Group, GroupProps, Player, SocketError, Vehicle} from '../models';
+import {
+  Group,
+  groupAlreadyExists,
+  groupNotFound,
+  GroupProps,
+  Player,
+  playerNotFound,
+  SocketError,
+  Vehicle,
+  vehicleNotFound
+} from '../models';
 import {AppSocket} from '../sockets';
 import {GroupUtils, RushUtils, SettingsUtils} from '../utils';
 import {SocketHandler} from './socket.handler';
@@ -12,14 +22,14 @@ export class GroupHandler implements SocketHandler {
   /* METHODS ============================================================== */
   bindEvents(socket: AppSocket): void {
     // Group
-    socket.bindEvent('lobby:group:create', this._createGroup.bind(this));
-    socket.bindEvent('lobby:group:updateProps', this._updateGroupProps.bind(this));
-    socket.bindEvent('lobby:group:remove', this._removeGroup.bind(this));
+    socket.bindEvent('group:create', this._createGroup.bind(this));
+    socket.bindEvent('group:updateProps', this._updateGroupProps.bind(this));
+    socket.bindEvent('group:remove', this._removeGroup.bind(this));
 
     // Player
-    socket.bindEvent('lobby:group:addPlayer', this._addPlayer.bind(this));
-    socket.bindEvent('lobby:group:removePlayer', this._removePlayer.bind(this));
-    socket.bindEvent('lobby:group:switchPlayer', this._switchPlayer.bind(this));
+    socket.bindEvent('group:addPlayer', this._addPlayer.bind(this));
+    socket.bindEvent('group:removePlayer', this._removePlayer.bind(this));
+    socket.bindEvent('group:switchPlayer', this._switchPlayer.bind(this));
   }
 
   /**
@@ -39,13 +49,13 @@ export class GroupHandler implements SocketHandler {
     if (groupName) {
       const groupNames = socket.rush.groups.map(g => g.name);
       if (groupNames.includes(groupName)) {
-        throw new SocketError('groupAlreadyExists', {groupName: groupName});
+        throw groupAlreadyExists(groupName);
       }
       group.name = groupName;
     }
 
     socket.rush.groups.push(group);
-    socket.all('lobby:group:created', group);
+    socket.all('group:created', group);
   }
 
   /**
@@ -59,14 +69,14 @@ export class GroupHandler implements SocketHandler {
     const groupIndex = data.groupIndex;
     const group = RushUtils.findGroup(socket.rush, groupIndex);
     if (!group) {
-      throw new SocketError('groupNotFound', {groupIndex: groupIndex});
+      throw groupNotFound(groupIndex);
     }
 
     const updatedProps = data.updatedProps;
     if (updatedProps.name !== undefined) {
       const groupNames = socket.rush.groups.map(g => g.name);
       if (groupNames.includes(updatedProps.name)) {
-        throw new SocketError('groupAlreadyExists', {groupName: updatedProps.name});
+        throw groupAlreadyExists(updatedProps.name);
       }
       group.name = updatedProps.name;
     }
@@ -76,8 +86,7 @@ export class GroupHandler implements SocketHandler {
       if (data.updatedProps.vehicleName) {
         vehicle = SettingsUtils.findVehicle(socket.rush.settings, updatedProps.vehicleName);
         if (!vehicle) {
-          throw new SocketError('vehicleNotFound', {vehicleName: updatedProps.vehicleName});
-          return;
+          throw vehicleNotFound(updatedProps.vehicleName);
         }
       }
       group.vehicle = vehicle;
@@ -94,7 +103,7 @@ export class GroupHandler implements SocketHandler {
       group.leader = leader;
     }
 
-    socket.all('lobby:group:propsUpdated', data);
+    socket.all('group:propsUpdated', data);
   }
 
   /**
@@ -107,10 +116,10 @@ export class GroupHandler implements SocketHandler {
   private _removeGroup(socket: AppSocket, groupIndex: number): void {
     const group = RushUtils.deleteGroup(socket.rush, groupIndex);
     if (!group) {
-      throw new SocketError('groupNotFound', {groupIndex: groupIndex});
+      throw groupNotFound(groupIndex);
     }
     socket.rush.players.push(...group.players);
-    socket.all('lobby:group:removed', {groupIndex: groupIndex});
+    socket.all('group:removed', {groupIndex: groupIndex});
   }
 
   /* Player ---------------------------------------------------------------- */
@@ -124,7 +133,7 @@ export class GroupHandler implements SocketHandler {
   private _addPlayer(socket: AppSocket, data: { playerName: string, groupIndex: number }): void {
     const player = RushUtils.findPlayer(socket.rush, data.playerName);
     if (!player) {
-      throw new SocketError('playerNotFound', {playerName: data.playerName});
+      throw playerNotFound(data.playerName);
     }
 
     const group = RushUtils.findGroup(socket.rush, data.groupIndex);
@@ -134,7 +143,7 @@ export class GroupHandler implements SocketHandler {
 
     RushUtils.deletePlayer(socket.rush, data.playerName);
     group.players.push(player);
-    socket.all('lobby:group:playerAdded', data);
+    socket.all('group:playerAdded', data);
   }
 
   /**
@@ -147,7 +156,7 @@ export class GroupHandler implements SocketHandler {
   private _removePlayer(socket: AppSocket, data: { playerName: string, groupIndex: number }): void {
     const group = RushUtils.findGroup(socket.rush, data.groupIndex);
     if (!group) {
-      throw new SocketError('groupNotFound', {groupIndex: data.groupIndex});
+      throw groupNotFound(data.groupIndex);
     }
 
     const playerIndex = GroupUtils.findPlayerIndex(group, data.playerName);
@@ -156,7 +165,7 @@ export class GroupHandler implements SocketHandler {
     }
 
     socket.rush.players.push(group.players.splice(playerIndex, 1)[0]);
-    socket.all('lobby:group:playerRemoved', data);
+    socket.all('group:playerRemoved', data);
   }
 
   /**
@@ -183,6 +192,6 @@ export class GroupHandler implements SocketHandler {
     }
 
     newGroup.players.push(oldGroup.players.splice(playerIndex, 1)[0]);
-    socket.all('lobby:group:playerSwitched', data);
+    socket.all('group:playerSwitched', data);
   }
 }

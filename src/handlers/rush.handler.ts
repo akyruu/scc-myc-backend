@@ -16,10 +16,10 @@ export class RushHandler implements SocketHandler {
 
   /* METHODS =============================================================== */
   bindEvents(socket: AppSocket): void {
-    socket.bindEvent('lobby:rush:create', this._createRush.bind(this));
-    socket.bindEvent('lobby:rush:join', this._joinRush.bind(this));
-    socket.bindEvent('lobby:rush:launch', this._launchRush.bind(this));
-    socket.bindEvent('lobby:rush:leave', this.leaveRush.bind(this));
+    socket.bindEvent('rush:create', this._createRush.bind(this));
+    socket.bindEvent('rush:join', this._joinRush.bind(this));
+    socket.bindEvent('rush:launch', this._launchRush.bind(this));
+    socket.bindEvent('rush:leave', this.leaveRush.bind(this));
   }
 
   /* Rush ---------------------------------------------------------------- */
@@ -63,7 +63,7 @@ export class RushHandler implements SocketHandler {
     rush.players.push(player);
     this._logger.info('Player <%s> join rush <%s>', data.playerName, data.rushUuid);
 
-    socket.broadcast('lobby:rush:playerJoined', player);
+    socket.broadcast('rush:playerJoined', player);
     return {player: player, rush: rush};
   }
 
@@ -81,7 +81,7 @@ export class RushHandler implements SocketHandler {
     socket.rush.launched = true;
     this._logger.info('The rush <%s> is launched', socket.rush.uuid);
 
-    socket.all('lobby:rush:launched');
+    socket.all('rush:launched');
   }
 
   /**
@@ -98,7 +98,7 @@ export class RushHandler implements SocketHandler {
         this._data.deleteRush(socket.rush);
         this._logger.info('Rush <%s> removed because no player connected', socket.rush.uuid);
       } else {
-        socket.broadcast('lobby:rush:playerLeaved', socket.player.name);
+        socket.broadcast('rush:playerLeaved', socket.player.name);
       }
       socket.leave();
     }
